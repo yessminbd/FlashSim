@@ -6,7 +6,7 @@ export const useRegion = () => useContext(RegionContext);
 
 export const RegionProvider = ({ children }) => {
   const [selectedRegionId, setSelectedRegionId] = useState(() => {
-    return localStorage.getItem('flashsim_region_id') || '1';
+    return localStorage.getItem('flashsim_region_id') || '';
   });
 
   // Sauvegarder lors des changements

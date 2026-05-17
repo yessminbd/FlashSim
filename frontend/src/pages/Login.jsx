@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const features = [
   { icon: '', title: 'Recharge instantanée', desc: 'Créditez votre SIM en quelques secondes, 24h/24.' },
@@ -18,17 +19,20 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    await new Promise(r => setTimeout(r, 600));
-    if (email === 'admin@flashsim.tn' && password === 'admin123') {
-      localStorage.setItem('flashsim_email', email);
-      onLogin('admin');
-      navigate('/admin/dashboard');
-    } else if (email && password) {
-      localStorage.setItem('flashsim_email', email);
-      onLogin('user');
-      navigate('/');
-    } else {
-      setError('Veuillez remplir tous les champs.');
+    try {
+      const res = await api.post('/auth/login/', { email, password });
+      const { access, refresh, user } = res.data;
+      localStorage.setItem('flashsim_access', access);
+      localStorage.setItem('flashsim_refresh', refresh);
+      localStorage.setItem('flashsim_email', user.email);
+      onLogin(user.role);
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Erreur lors de la connexion.');
     }
     setLoading(false);
   };

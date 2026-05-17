@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const steps = [
   { num: '01', text: 'Créez votre compte gratuitement' },
@@ -25,9 +26,19 @@ const Register = () => {
       return;
     }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 700));
-    setLoading(false);
-    navigate('/login');
+    try {
+      await api.post('/auth/register/', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        password2: formData.confirmPassword,
+      });
+      navigate('/login');
+    } catch (err) {
+      setError(err.response?.data?.error || err.response?.data?.email?.[0] || "Erreur lors de l'inscription.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const set = (key) => (e) => setFormData({ ...formData, [key]: e.target.value });
